@@ -7,5 +7,6 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
 alias cls='clear'
-alias open='explorer.exe'  
 alias myip="curl ifconfig.me && echo"
+
+alias pyvenv="source .venv/bin/activate; which python"
