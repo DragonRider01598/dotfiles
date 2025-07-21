@@ -143,7 +143,26 @@ autoload_nvmrc() {
     fi
   fi
 }
-export PROMPT_COMMAND="autoload_nvmrc;$PROMPT_COMMAND"
+
+autoload_venv() {
+  local venv_path=""
+  if [[ -f ".venv/bin/activate" ]]; then
+    venv_path="$(realpath .venv)"
+  elif [[ -f "venv/bin/activate" ]]; then
+    venv_path="$(realpath venv)"
+  fi
+
+  if [[ -n "$venv_path" ]]; then
+    if [[ "$VIRTUAL_ENV" != "$venv_path" ]]; then
+      [ -n "$VIRTUAL_ENV" ] && deactivate 2>/dev/null
+      source "$venv_path/bin/activate"
+    fi
+  else
+    # If no venv found, but one is active, deactivate
+    [[ -n "$VIRTUAL_ENV" ]] && deactivate 2>/dev/null
+  fi
+}
+export PROMPT_COMMAND="autoload_nvmrc; autoload_venv; $PROMPT_COMMAND"
 
 # Reload shell easily
 alias reload='source ~/.bashrc'

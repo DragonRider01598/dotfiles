@@ -9,4 +9,4 @@ alias egrep='egrep --color=auto'
 alias cls='clear'
 alias myip="curl ifconfig.me && echo"
 
-alias pyvenv="source .venv/bin/activate; which python"
+alias pls='sudo $(fc -ln -1)'
