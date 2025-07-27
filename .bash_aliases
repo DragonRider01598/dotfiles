@@ -10,3 +10,4 @@ alias cls='clear'
 alias myip="curl ifconfig.me && echo"
 
 alias pls='sudo $(fc -ln -1)'
+alias ports='ss -tulnp'

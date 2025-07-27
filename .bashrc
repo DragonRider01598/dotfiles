@@ -162,6 +162,8 @@ autoload_venv() {
     [[ -n "$VIRTUAL_ENV" ]] && deactivate 2>/dev/null
   fi
 }
+export HISTTIMEFORMAT="%F %T "
+export HISTIGNORE='ls:cd:cls:exit:history'
 export PROMPT_COMMAND="autoload_nvmrc; autoload_venv; $PROMPT_COMMAND"
 
 # Reload shell easily
