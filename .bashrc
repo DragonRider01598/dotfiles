@@ -190,5 +190,12 @@ if [[ -n "$VIRTUAL_ENV" ]]; then
 fi
 
 # -- sdkman support for java environments --
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk-init() {
+  export SDKMAN_DIR="$HOME/.sdkman"
+  if [ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]; then
+    source "$SDKMAN_DIR/bin/sdkman-init.sh"
+    echo "SDKMAN initialized."
+  else
+    echo "SDKMAN not found at $SDKMAN_DIR"
+  fi
+}
