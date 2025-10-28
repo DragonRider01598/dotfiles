@@ -2,12 +2,12 @@
 
 # If not running interactively, don't do anything
 case $- in
-    *i*) ;;
-      *) return;;
+*i*) ;;
+*) return ;;
 esac
 
 # don't put duplicate lines or lines starting with space in the history.
-HISTCONTROL=ignoreboth
+HISTCONTROL=ignoredups:erasedups
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -61,7 +61,7 @@ fi
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+  test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
 fi
 
 # colored GCC warnings and errors
@@ -74,7 +74,7 @@ export VISUAL=vim
 # Alias definitions.
 # You may want to put all your additions into a separate file like\
 if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
+  . ~/.bash_aliases
 fi
 
 if ! shopt -oq posix; then
@@ -105,31 +105,30 @@ extract() {
     fi
 
     case "$archive" in
-      *.tar.bz2|*.tbz2)     tar xvjf "$archive" ;;
-      *.tar.gz|*.tgz)       tar xvzf "$archive" ;;
-      *.tar.xz)             tar --xz -xvf "$archive" ;;
-      *.tar.zst)            tar --zstd -xvf "$archive" ;;
-      *.tar.lzma)           tar --lzma -xvf "$archive" ;;
-      *.tar)                tar xvf "$archive" ;;
-      *.bz2)                bunzip2 "$archive" ;;
-      *.gz)                 gunzip "$archive" ;;
-      *.xz)                 unxz "$archive" ;;
-      *.lzma)               unlzma "$archive" ;;
-      *.zst)                unzstd "$archive" ;;
-      *.zip)                unzip "$archive" ;;
-      *.rar)                unrar x "$archive" ;;
-      *.7z)                 7z x "$archive" ;;
-      *.cab)                cabextract "$archive" ;;
-      *.cpio)               cpio -id < "$archive" ;;
-      *.Z)                  uncompress "$archive" ;;
-      *.ar)                 ar x "$archive" ;;
-      *) echo "Cannot extract '$archive' — unknown format." ;;
+    *.tar.bz2 | *.tbz2) tar xvjf "$archive" ;;
+    *.tar.gz | *.tgz) tar xvzf "$archive" ;;
+    *.tar.xz) tar --xz -xvf "$archive" ;;
+    *.tar.zst) tar --zstd -xvf "$archive" ;;
+    *.tar.lzma) tar --lzma -xvf "$archive" ;;
+    *.tar) tar xvf "$archive" ;;
+    *.bz2) bunzip2 "$archive" ;;
+    *.gz) gunzip "$archive" ;;
+    *.xz) unxz "$archive" ;;
+    *.lzma) unlzma "$archive" ;;
+    *.zst) unzstd "$archive" ;;
+    *.zip) unzip "$archive" ;;
+    *.rar) unrar x "$archive" ;;
+    *.7z) 7z x "$archive" ;;
+    *.cab) cabextract "$archive" ;;
+    *.cpio) cpio -id <"$archive" ;;
+    *.Z) uncompress "$archive" ;;
+    *.ar) ar x "$archive" ;;
+    *) echo "Cannot extract '$archive' — unknown format." ;;
     esac
   done
 }
 
 # unrar p7zip-full cabextract xz-utils zstd lzma
-
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -174,18 +173,22 @@ stty werase \^H
 
 # --- Initialize pyenv only when NOT in a virtual environment ---
 if [[ -z "$VIRTUAL_ENV" ]]; then
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
+  export PYENV_ROOT="$HOME/.pyenv"
+  export PATH="$PYENV_ROOT/bin:$PATH"
 
-    if command -v pyenv 1>/dev/null 2>&1; then
-        eval "$(pyenv init --path)"
-        eval "$(pyenv init -)"
-    fi
+  if command -v pyenv 1>/dev/null 2>&1; then
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+  fi
 fi
 
 # --- When inside a venv, make sure its bin/ is before pyenv shims ---
 if [[ -n "$VIRTUAL_ENV" ]]; then
-    PATH="$VIRTUAL_ENV/bin:$PATH"
-    PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "$HOME/.pyenv/shims" | paste -sd ':' -)
-    export PATH
+  PATH="$VIRTUAL_ENV/bin:$PATH"
+  PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "$HOME/.pyenv/shims" | paste -sd ':' -)
+  export PATH
 fi
+
+# -- sdkman support for java environments --
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"

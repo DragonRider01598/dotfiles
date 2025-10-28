@@ -52,4 +52,4 @@ for file in "${!FILES_TO_COPY[@]}"; do
 done
 
 echo
-echo "Dotfile setup complete. Restart your terminal or run: source ~/.bashrc"
+echo "Dotfile setup complete. Restart your terminal or run: reload 
