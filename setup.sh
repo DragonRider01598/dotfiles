@@ -1,24 +1,23 @@
 #!/bin/bash
+set -euo pipefail
 
-# Get the directory where this script is located (your dotfiles folder)
-DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOCAL_BIN="$HOME/.local/bin"
+DOTFILES_BIN="$DOTFILES_DIR/bin"
 
-# Config files to copy: [source in dotfiles] => [destination in home]
 declare -A FILES_TO_COPY=(
   [".bashrc"]="$HOME/.bashrc"
   [".bash_aliases"]="$HOME/.bash_aliases"
   [".vimrc"]="$HOME/.vimrc"
 )
 
-echo "Setting up local dotfiles from: $DOTFILES_DIR"
-echo
-
-copy_files() {
+copy_with_diff() {
   local src="$1"
   local dest="$2"
+  local make_executable="${3:-false}"
 
   if [[ ! -f "$src" ]]; then
-    echo "Warning: $src not found in dotfiles."
+    echo "Warning: $src not found — skipping."
     return
   fi
 
@@ -26,30 +25,53 @@ copy_files() {
     if cmp -s "$src" "$dest"; then
       echo "Identical: $dest — skipping."
       return
-    else
-      echo "Difference detected in: $dest"
-      diff --color=always -u "$dest" "$src" || true
-      echo
-      read -rp "Overwrite $dest with $src? [y/N]: " confirm
-      if [[ "$confirm" =~ ^[yY]$ ]]; then
-        cp "$src" "$dest"
-        echo "Copied: $src → $dest"
-      else
-        echo "Skipped: $dest"
-      fi
     fi
+
+    echo "Difference detected in: $dest"
+    diff --color=always -u "$dest" "$src" || true
+    echo
+    read -rp "Overwrite $dest? [y/N]: " confirm
+    [[ "$confirm" =~ ^[yY]$ ]] || { echo "Skipped: $dest"; return; }
+  fi
+
+  cp "$src" "$dest"
+
+  if [[ "$make_executable" == "true" ]]; then
+    chmod +x "$dest"
+  fi
+
+  if [[ -f "$dest" ]]; then
+    echo "Installed: $dest"
   else
-    cp "$src" "$dest"
-    echo "Copied: $src → $dest (new file)"
+    echo "Copied: $src → $dest"
   fi
 }
 
-# Process each file
+echo "Setting up local dotfiles from: $DOTFILES_DIR"
+echo
+
 for file in "${!FILES_TO_COPY[@]}"; do
-  src="$DOTFILES_DIR/$file"
-  dest="${FILES_TO_COPY[$file]}"
-  copy_files "$src" "$dest"
+  copy_with_diff \
+    "$DOTFILES_DIR/$file" \
+    "${FILES_TO_COPY[$file]}"
 done
 
 echo
-echo "Dotfile setup complete. Restart your terminal or run: reload 
+echo "✔ Dotfile setup complete."
+
+echo
+echo "Setting up local bin scripts from: $DOTFILES_BIN"
+echo
+
+mkdir -p "$LOCAL_BIN"
+
+for script in "$DOTFILES_BIN"/*; do
+  [[ -f "$script" ]] || continue
+  copy_with_diff \
+    "$script" \
+    "$LOCAL_BIN/$(basename "$script")" \
+    true
+done
+
+echo
+echo "✔ Local bin setup complete."

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+THEME_DIR="$HOME/.themes/Orchis-theme"
+REPO_URL="https://github.com/vinceliuice/Orchis-theme.git"
+
+echo "▶ Checking Orchis theme directory..."
+
+if [[ ! -d "$THEME_DIR" ]]; then
+  echo "▶ Orchis-theme not found, cloning repository..."
+  mkdir -p "$(dirname "$THEME_DIR")"
+  git clone "$REPO_URL" "$THEME_DIR"
+else
+  echo "▶ Orchis-theme found"
+fi
+
+cd "$THEME_DIR"
+
+echo "▶ Pulling latest Orchis changes..."
+git pull --ff-only
+
+echo "▶ Reinstalling Orchis..."
+./install.sh \
+  -l \
+  -c dark \
+  -t teal \
+  -i arch \
+  -s standard \
+  --tweaks macos primary
+
+echo "✔ Orchis update complete."

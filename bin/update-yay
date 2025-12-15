@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Ensure we are not running as root
+if [[ $EUID -eq 0 ]]; then
+  echo "Do not run this script as root."
+  exit 1
+fi
+
+# Create a temporary directory
+TMPDIR="$(mktemp -d)"
+cd "$TMPDIR"
+
+# Clone yay-bin from AUR
+git clone https://aur.archlinux.org/yay-bin.git
+cd yay-bin
+
+# Build and install
+makepkg -si --noconfirm
+
+# Cleanup
+cd ~
+rm -rf "$TMPDIR"
+
+echo "✔ yay-bin installed successfully."
