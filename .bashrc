@@ -164,6 +164,7 @@ autoload_venv() {
 export HISTTIMEFORMAT="%F %T "
 export HISTIGNORE='ls:cd:cls:exit:history'
 export PROMPT_COMMAND="autoload_nvmrc; autoload_venv; $PROMPT_COMMAND"
+export PATH="$HOME/.local/bin:$PATH"
 
 # Reload shell easily
 alias reload='source ~/.bashrc'
