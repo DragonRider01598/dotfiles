@@ -25,39 +25,54 @@ export COLORTERM=truecolor
 export XDG_CONFIG_DIRS=/etc/xdg
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
-PROMPT_COMMAND='
-cwd=$(pwd)
-basename=$(basename "$cwd")
-parent=$(dirname "$cwd")
+__set_prompt() {
+  local last_status=$?
 
-# Get venv name (basename of VIRTUAL_ENV path), if any
-if [[ -n "$VIRTUAL_ENV" ]]; then
-    venv_name=$(basename "$VIRTUAL_ENV")
-    venv_display="\[\033[0;37m\]($venv_name) \[\033[0m\]"  # grey
-else
-    venv_display=""
-fi
+  # Colors (non-printing sequences wrapped)
+  local C_RESET="\[\033[0m\]"
+  local C_BLUE="\[\033[1;34m\]"
+  local C_GREEN="\[\033[1;32m\]"
+  local C_RED="\[\033[1;31m\]"
+  local C_GREY="\[\033[0;37m\]"
 
-# Show ❯ before folder name if nested, else just folder name or empty if in home
-if [[ "$cwd" == "$HOME" ]]; then
+  local cwd=$PWD
+  local basename=${cwd##*/}
+  local parent=${cwd%/*}
+
+  local venv_display=""
+  local folder_display=""
+  local fail_display=""
+
+  # Failure indicator
+  if ((last_status != 0)); then
+    fail_display="${C_RED}✗ ${C_RESET}"
+  fi
+
+  # Virtual environment
+  if [[ -n $VIRTUAL_ENV ]]; then
+    venv_display="${C_GREY}(${VIRTUAL_ENV##*/}) ${C_RESET}"
+  fi
+
+  # Folder display logic
+  if [[ $cwd == "$HOME" ]]; then
     folder_display=""
-elif [[ "$parent" == "/" || "$parent" == "$HOME" ]]; then
+  elif [[ $parent == "/" || $parent == "$HOME" ]]; then
     folder_display="$basename"
-else
+  else
     folder_display="❯ $basename"
-fi
+  fi
 
-# Root user prompt (red >)
-if [[ $EUID -eq 0 ]]; then
-    PS1="$venv_display\[\033[1;34m\]$folder_display \[\033[1;31m\]>\[\033[0m\] "
-# Normal user in home (green > only)
-elif [[ "$cwd" == "$HOME" ]]; then
-    PS1="$venv_display\[\033[1;32m\]>\[\033[0m\] "
-# Normal user elsewhere (folder + green >)
-else
-    PS1="$venv_display\[\033[1;34m\]$folder_display \[\033[1;32m\]>\[\033[0m\] "
-fi
-'
+  # Final PS1
+  if ((EUID == 0)); then
+    PS1="${fail_display}${venv_display}${C_BLUE}${folder_display} ${C_RED}>${C_RESET} "
+  elif [[ $cwd == "$HOME" ]]; then
+    PS1="${fail_display}${venv_display}${C_GREEN}>${C_RESET} "
+  else
+    PS1="${fail_display}${venv_display}${C_BLUE}${folder_display} ${C_GREEN}>${C_RESET} "
+  fi
+}
+
+PROMPT_COMMAND=__set_prompt
 
 # enable color support of ls
 if [ -x /usr/bin/dircolors ]; then
