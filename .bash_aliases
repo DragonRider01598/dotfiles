@@ -9,7 +9,7 @@ alias egrep='egrep --color=auto'
 alias cls='clear'
 alias myip="curl ifconfig.me && echo"
 
-alias pls='sudo $(fc -ln -1)'
+alias reload='source ~/.bashrc'
 alias ports='ss -tulnp'
 
 alias cu='checkupdates'

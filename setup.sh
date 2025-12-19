@@ -8,6 +8,7 @@ DOTFILES_BIN="$DOTFILES_DIR/bin"
 declare -A FILES_TO_COPY=(
   [".bashrc"]="$HOME/.bashrc"
   [".bash_aliases"]="$HOME/.bash_aliases"
+  [".bash_funcs"]="$HOME/.bash_funcs"
   [".vimrc"]="$HOME/.vimrc"
 )
 
@@ -31,7 +32,10 @@ copy_with_diff() {
     diff --color=always -u "$dest" "$src" || true
     echo
     read -rp "Overwrite $dest? [y/N]: " confirm
-    [[ "$confirm" =~ ^[yY]$ ]] || { echo "Skipped: $dest"; return; }
+    [[ "$confirm" =~ ^[yY]$ ]] || {
+      echo "Skipped: $dest"
+      return
+    }
   fi
 
   cp "$src" "$dest"
