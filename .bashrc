@@ -13,7 +13,6 @@ shopt -s histappend checkwinsize
 shopt -s autocd cdspell
 
 # === TERMINAL ===
-echo -ne '\e[6 q'
 export TERM=xterm-256color
 export COLORTERM=truecolor
 export XDG_CONFIG_DIRS=/etc/xdg
@@ -91,8 +90,11 @@ pyenv() {
   pyenv "$@"
 }
 
-# === PROMPT HOOKS (SAFE APPEND) ===
+__set_cursor() { echo -ne '\e[6 q'; }
+
+# === PROMPT HOOKS ===
 PROMPT_COMMAND=(
+  __set_cursor
   autoload_nvmrc
   autoload_venv
   "$PROMPT_COMMAND"
