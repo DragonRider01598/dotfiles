@@ -34,17 +34,22 @@ C_GREY='\[\033[0;37m\]'
 # === PROMPT ===
 __prompt_build() {
   local status=$?
-  local cwd=${PWD/#$HOME/~}
-  local basename=${cwd##*/}
   local fail=""
   local venv=""
 
   ((status != 0)) && fail="${C_RED}✗ ${C_RESET}"
   [[ -n $VIRTUAL_ENV ]] && venv="${C_GREY}(${VIRTUAL_ENV##*/}) ${C_RESET}"
 
-  if [[ $cwd == "~" ]]; then
+  # HOME directory → no dir name at all
+  if [[ $PWD == "$HOME" ]]; then
     PS1="${fail}${venv}${C_GREEN}>${C_RESET} "
-  elif ((EUID == 0)); then
+    return
+  fi
+
+  # Not HOME → show only basename
+  local basename=${PWD##*/}
+
+  if ((EUID == 0)); then
     PS1="${fail}${venv}${C_BLUE}${basename} ${C_RED}>${C_RESET} "
   else
     PS1="${fail}${venv}${C_BLUE}${basename} ${C_GREEN}>${C_RESET} "
