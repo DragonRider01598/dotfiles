@@ -11,7 +11,6 @@ set showmatch
 set formatoptions-=cro
 
 " --- Bell Behaviour ---
-set visualbell
 set noerrorbells
 
 " --- Splits ---
