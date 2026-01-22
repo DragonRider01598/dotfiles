@@ -36,6 +36,8 @@ __prompt_build() {
   local fail=""
   local venv=""
   local ssh_note=""
+  local user_color=""
+  local dir_display=""
 
   ((status != 0)) && fail="${C_RED}✗ ${C_RESET}"
   [[ -n $VIRTUAL_ENV ]] && venv="${C_GREY}(${VIRTUAL_ENV##*/}) ${C_RESET}"
@@ -45,20 +47,22 @@ __prompt_build() {
     ssh_note="${C_RED}[SSH] ${C_RESET}"
   fi
 
-  # HOME directory → no dir name at all
-  if [[ $PWD == "$HOME" ]]; then
-    PS1="${fail}${ssh_note}${venv}${C_GREEN}>${C_RESET} "
-    return
-  fi
-
-  # Not HOME → show only basename
-  local basename=${PWD##*/}
-
+  # check if user is root
   if ((EUID == 0)); then
-    PS1="${fail}${ssh_note}${venv}${C_BLUE}${basename} ${C_RED}>${C_RESET} "
+    user_color="${C_RED}"
   else
-    PS1="${fail}${ssh_note}${venv}${C_BLUE}${basename} ${C_GREEN}>${C_RESET} "
+    user_color="${C_GREEN}"
   fi
+  
+  if [[ $PWD == "$HOME" ]]; then
+    # HOME directory → no dir name at all
+    dir_display=""
+  else
+    # Not HOME → show only basename
+    dir_display="${C_BLUE}${PWD##*/} "
+  fi
+
+  PS1="${fail}${ssh_note}${venv}${dir_display}${user_color}>${C_RESET} "
 }
 
 PROMPT_COMMAND=__prompt_build
