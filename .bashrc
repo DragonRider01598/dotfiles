@@ -35,13 +35,19 @@ __prompt_build() {
   local status=$?
   local fail=""
   local venv=""
+  local ssh_note=""
 
   ((status != 0)) && fail="${C_RED}✗ ${C_RESET}"
   [[ -n $VIRTUAL_ENV ]] && venv="${C_GREY}(${VIRTUAL_ENV##*/}) ${C_RESET}"
 
+  # Check if we are in an SSH session
+  if [[ -n $SSH_CLIENT ]] || [[ -n $SSH_TTY ]]; then
+    ssh_note="${C_RED}[SSH] ${C_RESET}"
+  fi
+
   # HOME directory → no dir name at all
   if [[ $PWD == "$HOME" ]]; then
-    PS1="${fail}${venv}${C_GREEN}>${C_RESET} "
+    PS1="${fail}${ssh_note}${venv}${C_GREEN}>${C_RESET} "
     return
   fi
 
@@ -49,9 +55,9 @@ __prompt_build() {
   local basename=${PWD##*/}
 
   if ((EUID == 0)); then
-    PS1="${fail}${venv}${C_BLUE}${basename} ${C_RED}>${C_RESET} "
+    PS1="${fail}${ssh_note}${venv}${C_BLUE}${basename} ${C_RED}>${C_RESET} "
   else
-    PS1="${fail}${venv}${C_BLUE}${basename} ${C_GREEN}>${C_RESET} "
+    PS1="${fail}${ssh_note}${venv}${C_BLUE}${basename} ${C_GREEN}>${C_RESET} "
   fi
 }
 
