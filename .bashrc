@@ -112,3 +112,9 @@ PROMPT_COMMAND=(
 
 # === INPUT ===
 stty werase '^H'
+
+# Auto-start tmux for SSH sessions
+if [[ -n "$SSH_CONNECTION" && -z "$TMUX" ]]; then
+    command -v tmux >/dev/null || return
+    tmux attach -t main || tmux new -s main
+fi
