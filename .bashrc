@@ -17,6 +17,7 @@ export TERM=xterm-256color
 export COLORTERM=truecolor
 export XDG_CONFIG_DIRS=/etc/xdg
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+export LESS='-R --use-color'
 
 # === ENVIRONMENT ===
 export EDITOR=vim
