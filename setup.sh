@@ -6,10 +6,11 @@ LOCAL_BIN="$HOME/.local/bin"
 DOTFILES_BIN="$DOTFILES_DIR/bin"
 
 declare -A FILES_TO_COPY=(
-  [".bashrc"]="$HOME/.bashrc"
-  [".bash_aliases"]="$HOME/.bash_aliases"
-  [".bash_funcs"]="$HOME/.bash_funcs"
-  [".vimrc"]="$HOME/.vimrc"
+  ["bashrc"]="$HOME/.bashrc"
+  ["bash_aliases"]="$HOME/.bash_aliases"
+  ["bash_funcs"]="$HOME/.bash_funcs"
+  ["vimrc"]="$HOME/.vimrc"
+  ["tmux.conf"]="$HOME/.config/tmux/tmux.conf"
 )
 
 copy_with_diff() {
@@ -21,6 +22,10 @@ copy_with_diff() {
     echo "Warning: $src not found — skipping."
     return
   fi
+
+  local dest_dir
+  dest_dir="$(dirname "$dest")"
+  mkdir -p "$dest_dir"
 
   if [[ -f "$dest" ]]; then
     if cmp -s "$src" "$dest"; then
