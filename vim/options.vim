@@ -8,3 +8,8 @@ set switchbuf=useopen,usetab      " Open tab if file already open
 
 set updatetime=100                " Update git signs quickly
 set signcolumn=yes                " Always show the sign column.
+
+set spelllang=en_us               " language for spellings
+set complete+=kspell              " use dictonary for autocompletion too
+set completeopt=menuone,longest   " give menu for one entry and match to the closest match
+set shortmess+=c                  " stop giving info at lightline for completions
