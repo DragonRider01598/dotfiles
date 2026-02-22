@@ -65,6 +65,26 @@ for file in "${!FILES_TO_COPY[@]}"; do
     "${FILES_TO_COPY[$file]}"
 done
 
+echo "Setting up .vim configuration files..."
+VIM_DOTFILES_DIR="$DOTFILES_DIR/vim" 
+VIM_HOME_DIR="$HOME/.vim"
+
+if [[ -d "$VIM_DOTFILES_DIR" ]]; then
+  mkdir -p "$VIM_HOME_DIR"
+
+  for src_file in "$VIM_DOTFILES_DIR"/*; do
+      [[ -f "$src_file" ]] || continue
+
+      filename=$(basename "$src_file")
+      dest_file="$VIM_HOME_DIR/$filename"
+
+      copy_with_diff "$src_file" "$dest_file"
+  done
+
+else
+  echo "Warning: $VIM_DOTFILES_DIR not found. Skipping .vim modules."
+fi
+
 echo
 echo "✔ Dotfile setup complete."
 
