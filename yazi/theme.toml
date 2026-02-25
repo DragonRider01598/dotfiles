@@ -1,0 +1,48 @@
+# --- Manager UI ---
+[mgr]
+cwd = { fg = "#7daea3", bold = true } # Muted Blue-Grey CWD
+border_symbol = "│"
+border_style  = { fg = "#3c3836" } # Dark Background Gray
+
+# Markers
+marker_selected = { fg = "#a9b665", bg = "#a9b665" } # Muted Green
+marker_copied   = { fg = "#7daea3", bg = "#7daea3" }
+marker_cut      = { fg = "#ea6962", bg = "#ea6962" } # Muted Red
+
+# --- Status Bar ---
+[status]
+separator_open  = ""
+separator_close = ""
+
+# Permissions 
+perm_type  = { fg = "#7daea3" }
+perm_read  = { fg = "#d8a657" } # Muted Yellow
+perm_write = { fg = "#e78a4e" } # Muted Orange
+perm_exec  = { fg = "#a9b665" }
+perm_sep   = { fg = "#928374" } # Grey
+
+progress_label  = { fg = "#bd9b7b", bold = true } # Muted Tan
+progress_normal = { fg = "#504945", bg = "#3c3836" }
+
+# --- Mode Indicators ---
+[mode]
+# Normal Mode 
+normal_main = { fg = "#282828", bg = "#7daea3", bold = true } 
+normal_alt  = { fg = "#7daea3", bg = "#3c3836" }
+
+# Select Mode
+select_main = { fg = "#282828", bg = "#a9b665", bold = true }
+select_alt  = { fg = "#a9b665", bg = "#3c3836" }
+
+# --- File Types ---
+[filetype]
+rules = [
+    # Directories (Muted Blue)
+    { url = "*/", fg = "#7daea3", bold = true },
+
+    # Executables (Muted Green)
+    { is = "exec", fg = "#a9b665" },
+
+    # Fallback (Grey)
+    { url = "*", fg = "#a89984" }
+]

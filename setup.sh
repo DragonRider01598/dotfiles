@@ -10,7 +10,12 @@ declare -A FILES_TO_COPY=(
   ["bash_aliases"]="$HOME/.bash_aliases"
   ["bash_funcs"]="$HOME/.bash_funcs"
   ["vimrc"]="$HOME/.vimrc"
-  ["tmux.conf"]="$HOME/.config/tmux/tmux.conf"
+)
+
+declare -A DIRS_TO_COPY=(
+    ["vim"]="$HOME/.vim"
+    ["yazi"]="$HOME/.config/yazi"
+    ["tmux"]="$HOME/.config/tmux"
 )
 
 copy_with_diff() {
@@ -65,25 +70,24 @@ for file in "${!FILES_TO_COPY[@]}"; do
     "${FILES_TO_COPY[$file]}"
 done
 
-echo "Setting up .vim configuration files..."
-VIM_DOTFILES_DIR="$DOTFILES_DIR/vim" 
-VIM_HOME_DIR="$HOME/.vim"
+echo "Setting up configuration directories..."
+for dir_key in "${!DIRS_TO_COPY[@]}"; do
+  src_dir="$DOTFILES_DIR/$dir_key"
+  dest_dir="${DIRS_TO_COPY[$dir_key]}"
 
-if [[ -d "$VIM_DOTFILES_DIR" ]]; then
-  mkdir -p "$VIM_HOME_DIR"
+  if [[ -d "$src_dir" ]]; then
+    mkdir -p "$dest_dir"
 
-  for src_file in "$VIM_DOTFILES_DIR"/*; do
-      [[ -f "$src_file" ]] || continue
-
+    for src_file in "$src_dir"/*; do
       filename=$(basename "$src_file")
-      dest_file="$VIM_HOME_DIR/$filename"
+      dest_file="$dest_dir/$filename"
 
       copy_with_diff "$src_file" "$dest_file"
-  done
-
-else
-  echo "Warning: $VIM_DOTFILES_DIR not found. Skipping .vim modules."
-fi
+    done
+  else
+    echo "Warning: $src_dir not found — skipping $dir_key modules."
+  fi
+done
 
 echo
 echo "✔ Dotfile setup complete."

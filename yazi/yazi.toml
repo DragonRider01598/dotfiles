@@ -1,0 +1,4 @@
+[manager]
+sort_by = "natural"
+sort_sensitive = false
+linemode = "size" 
