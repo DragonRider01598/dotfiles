@@ -13,6 +13,11 @@ pls() {
   esac
 }
 
+# make dir and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1" || return 1
+}
+
 # run update only for AUR packages on 'yay'
 yay() {
   if [ "$#" -eq 0 ]; then
