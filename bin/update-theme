@@ -2,7 +2,7 @@
 set -euo pipefail
 
 THEME_DIR="$HOME/.themes/Orchis-theme"
-REPO_URL="https://github.com/vinceliuice/Orchis-theme.git"
+REPO_URL="https://github.com/DragonRider01598/Orchis-theme.git"
 
 echo "▶ Checking Orchis theme directory..."
 
@@ -38,6 +38,6 @@ echo "▶ Reinstalling Orchis..."
   -t teal \
   -i arch \
   -s standard \
-  --tweaks macos primary
+  --tweaks macos primary submenu
 
 echo "✔ Orchis update complete."
