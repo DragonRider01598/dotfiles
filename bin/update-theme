@@ -1,43 +1,57 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-THEME_DIR="$HOME/.themes/Orchis-theme"
-REPO_URL="https://github.com/DragonRider01598/Orchis-theme.git"
+GTK_THEME_DIR="$HOME/.themes/Orchis-theme"
+GTK_REPO_URL="https://github.com/DragonRider01598/Orchis-theme.git"
 
-echo "▶ Checking Orchis theme directory..."
+ICON_THEME_DIR="$HOME/.local/share/icons/dreams-repo"
+ICON_REPO_URL="https://codeberg.org/mi7i/dreams.git"
 
-if [[ ! -d "$THEME_DIR" ]]; then
-  echo "▶ Orchis-theme not found, cloning repository..."
-  mkdir -p "$(dirname "$THEME_DIR")"
-  git clone "$REPO_URL" "$THEME_DIR"
-  SHOULD_INSTALL=true
-else
-  echo "▶ Orchis-theme found"
-  SHOULD_INSTALL=false
+update_repo() {
+    local dir="$1"
+    local url="$2"
+    local name="$3"
+
+    if [[ ! -d "$dir" ]]; then
+        echo "▶ $name not found, cloning repository..."
+        mkdir -p "$(dirname "$dir")"
+        git clone "$url" "$dir"
+        return 0
+    fi
+
+    echo "▶ $name found. Checking for updates..."
+    cd "$dir"
+    git fetch
+    
+    local LOCAL=$(git rev-parse HEAD)
+    local REMOTE=$(git rev-parse @{u})
+
+    if [ "$LOCAL" = "$REMOTE" ]; then
+        echo "✔ $name is already up to date."
+        return 1
+    fi
+
+    echo "▶ Pulling latest $name changes..."
+    git pull --ff-only
+    return 0
+}
+
+if update_repo "$GTK_THEME_DIR" "$GTK_REPO_URL" "Orchis-theme"; then
+    echo "▶ Reinstalling Orchis..."
+    cd "$GTK_THEME_DIR"
+    ./install.sh \
+        -l \
+        -c dark \
+        -t teal \
+        -i arch \
+        -s standard \
+        --tweaks macos primary submenu
 fi
 
-cd "$THEME_DIR"
-echo "▶ Checking for remote updates..."
-git fetch
-
-LOCAL=$(git rev-parse HEAD)
-REMOTE=$(git rev-parse @{u})
-
-if [ "$LOCAL" = "$REMOTE" ] && [ "$SHOULD_INSTALL" = false ]; then
-    echo "✔ Theme is already up to date."
-    exit 0
+if update_repo "$ICON_THEME_DIR" "$ICON_REPO_URL" "Dreams-icons"; then
+    echo "▶ Reinstalling Dreams Icons..."
+    cd "$ICON_THEME_DIR"
+    ./install.sh
 fi
 
-echo "▶ Pulling latest Orchis changes..."
-git pull --ff-only
-
-echo "▶ Reinstalling Orchis..."
-./install.sh \
-  -l \
-  -c dark \
-  -t teal \
-  -i arch \
-  -s standard \
-  --tweaks macos primary submenu
-
-echo "✔ Orchis update complete."
+echo "✔ All themes updated successfully."
