@@ -41,7 +41,7 @@ rules = [
     { url = "*/", fg = "#7daea3", bold = true },
 
     # Executables (Muted Green)
-    { is = "exec", fg = "#a9b665" },
+    { mime = "application/*", is = "exec", fg = "#a9b665" },
 
     # Fallback (Grey)
     { url = "*", fg = "#a89984" }
