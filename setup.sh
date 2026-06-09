@@ -6,10 +6,7 @@ LOCAL_BIN="$HOME/.local/bin"
 DOTFILES_BIN="$DOTFILES_DIR/bin"
 
 declare -A FILES_TO_COPY=(
-  ["bashrc"]="$HOME/.bashrc"
-  ["bash_aliases"]="$HOME/.bash_aliases"
-  ["bash_funcs"]="$HOME/.bash_funcs"
-  ["vimrc"]="$HOME/.vimrc"
+    ["vimrc"]="$HOME/.vimrc"
 )
 
 declare -A DIRS_TO_COPY=(
@@ -39,9 +36,10 @@ copy_with_diff() {
     fi
 
     echo "Difference detected in: $dest"
-    diff --color=always -u "$dest" "$src" || true
+    diff -u "$dest" "$src" || true
     echo
-    read -rp "Overwrite $dest? [y/N]: " confirm
+    echo -n "Overwrite $dest? [y/N]: "
+    read -r confirm
     [[ "$confirm" =~ ^[yY]$ ]] || {
       echo "Skipped: $dest"
       return
@@ -60,6 +58,27 @@ copy_with_diff() {
     echo "Copied: $src → $dest"
   fi
 }
+
+printf "Select your shell configuration preference [bash/zsh/skip]\n[1-3 or Enter]: "
+read -r shell_choice
+
+case "$shell_choice" in
+  1|[Bb][Aa][Ss][Hh])
+    echo "-> Queueing Bash configurations..."
+    for file in bashrc bash_aliases bash_funcs; do
+      FILES_TO_COPY["bash/$file"]="$HOME/.${file}"
+    done
+    ;;
+  2|[Zz][Ss][Hh])
+    echo "-> Queueing Zsh configurations..."
+    for file in zshrc zsh_aliases zsh_funcs; do
+      FILES_TO_COPY["zsh/$file"]="$HOME/.${file}"
+    done
+    ;;
+  *)
+    echo "-> Skipping shell configuration."
+    ;;
+esac
 
 echo "Setting up local dotfiles from: $DOTFILES_DIR"
 echo

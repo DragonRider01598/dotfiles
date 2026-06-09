@@ -1,0 +1,11 @@
+alias ls='eza' #requires eza
+
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+alias cls='clear'
+
+alias reload='source ~/.zshrc'
+
+alias cu='checkupdates'

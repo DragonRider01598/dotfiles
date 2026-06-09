@@ -1,0 +1,73 @@
+# run previous command as root
+pls() {
+  local cmd
+  cmd="$(history -p '!!')"
+
+  [[ "$cmd" == pls* ]] && return 1
+
+  printf 'sudo %s\n' "$cmd"
+  read -r -p "Run this command? [Y/n] " reply
+  case "$reply" in
+    [nN]*) return 1 ;;
+    *) sudo bash -c "$cmd" ;;
+  esac
+}
+
+# make dir and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1" || return 1
+}
+
+# run update only for AUR packages on 'yay'
+yay() {
+  if [ "$#" -eq 0 ]; then
+    command yay -Sua
+  else
+    command yay "$@"
+  fi
+}
+
+# fix permission issues with Windows-mounted files
+fixperms() {
+  sudo find . -type f -exec chmod 644 {} \;
+  sudo find . -type d -exec chmod 755 {} \;
+  echo "Permissions fixed (644 for files, 755 for directories)"
+}
+
+# extract files through command line
+extract() {
+  if [ $# -eq 0 ]; then
+    echo "Usage: extract <file1> [file2 ...]"
+    return 1
+  fi
+
+  for archive in "$@"; do
+    if [ ! -f "$archive" ]; then
+      echo "Error: '$archive' is not a valid file."
+      continue
+    fi
+
+    case "$archive" in
+    *.tar.bz2 | *.tbz2) tar xvjf "$archive" ;;
+    *.tar.gz | *.tgz) tar xvzf "$archive" ;;
+    *.tar.xz) tar --xz -xvf "$archive" ;;
+    *.tar.zst) tar --zstd -xvf "$archive" ;;
+    *.tar.lzma) tar --lzma -xvf "$archive" ;;
+    *.tar) tar xvf "$archive" ;;
+    *.bz2) bunzip2 "$archive" ;;
+    *.gz) gunzip "$archive" ;;
+    *.xz) unxz "$archive" ;;
+    *.lzma) unlzma "$archive" ;;
+    *.zst) unzstd "$archive" ;;
+    *.zip) unzip "$archive" ;;
+    *.rar) unrar x "$archive" ;;
+    *.7z) 7z x "$archive" ;;
+    *.cab) cabextract "$archive" ;;
+    *.cpio) cpio -id <"$archive" ;;
+    *.Z) uncompress "$archive" ;;
+    *.ar) ar x "$archive" ;;
+    *) echo "Cannot extract '$archive' — unknown format." ;;
+    esac
+  done
+}
+# unrar p7zip-full cabextract xz-utils zstd lzma

@@ -1,0 +1,171 @@
+# ~/.zshrc — interactive only
+[[ $- != *i* ]] && return
+
+# Initialize native Zsh coloring variables
+autoload -U colors && colors
+
+# Initialize modern completion engine
+autoload -Uz compinit && compinit
+
+if [[ "$(uname)" == "Darwin" ]]; then
+  if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [[ -f "/usr/local/bin/brew" ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+fi
+
+setopt AUTO_CD                # type a folder name to 'cd' into it
+setopt CORRECT                # spellchecking/auto-correct for typo'd commands
+
+# keybindings for standard behaviors (Home, End, Delete) across different terminals
+bindkey -e
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+bindkey '^[[3~' delete-char
+bindkey '^H' backward-kill-words
+bindkey '^[[1;5D' backward-word
+bindkey '^[[1;5C' forward-word
+
+# Make Ctrl+backspace erase words (stops at slashes/symbols, not just spaces)
+autoload -U select-word-style
+select-word-style bash
+bindkey '^H' backward-kill-word
+
+bindkey '^R' history-incremental-search-backward
+
+if command -v fzf >/dev/null; then
+  __fzf_history_search() {
+    local selected_num
+    selected_num=$(fc -rl 1 | awk 'BEGIN {FS="\t"} {print $1" "$2}' | fzf +s --tac -n2..,.. --tiebreak=index --query="${LBUFFER}" --exact)
+    if [[ -n "$selected_num" ]]; then
+      local hist_num=$(echo "$selected_num" | awk '{print $1}')
+      LBUFFER=$(fc -ln "$hist_num" "$hist_num")
+    fi
+    zle reset-prompt
+  }
+  zle -N __fzf_history_search
+  bindkey '^R' __fzf_history_search
+fi
+
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+
+setopt EXTENDED_HISTORY       # Records timestamps; critical for advanced history management
+setopt HIST_IGNORE_ALL_DUPS   # Erase old duplicate lines when writing new ones
+setopt HIST_REDUCE_BLANKS     # Trim unnecessary spaces from commands
+setopt SHARE_HISTORY          # Share history instantly across all running sessions
+setopt INC_APPEND_HISTORY     # Write to history immediately
+setopt HIST_IGNORE_SPACE      # Preceding a command with a space skips saving it to history
+
+export TERM=xterm-256color
+export COLORTERM=truecolor
+export XDG_CONFIG_DIRS=/etc/xdg
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+export LESS='-R --use-color'
+
+if command -v fd >/dev/null 2>&1; then
+  export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
+elif command -v fdfind >/dev/null 2>&1; then
+  export FZF_DEFAULT_COMMAND='fdfind --type f --hidden --follow'
+fi
+
+export EDITOR=vim
+export VISUAL=vim
+export PATH="$HOME/.local/bin:$PATH"
+
+setopt PROMPT_SUBST
+
+# Track SSH state ONCE at startup
+if [[ -n $SSH_CLIENT ]] || [[ -n $SSH_TTY ]] || [[ -n $SSH_CONNECTION ]]; then
+  _SSH_PROMPT_NOTE="%F{red}[SSH] %f"
+else
+  _SSH_PROMPT_NOTE=""
+fi
+
+# RUNS ONLY ON DIRECTORY CHANGE (Heavy)
+__update_prompt_dir() {
+  if [[ "$PWD" == "$HOME" ]]; then
+    _CURRENT_DIR_PROMPT=""
+  else
+    _CURRENT_DIR_PROMPT="%F{blue}%1~ %f"
+  fi
+
+  typeset -f autoload_nvmrc >/dev/null && autoload_nvmrc
+  typeset -f autoload_venv >/dev/null && autoload_venv
+}
+
+# RUNS BEFORE EVERY SINGLE PROMPT RENDERING (Lightweight)
+__set_zsh_prompt() {
+  local exit_status=$? # return code of the last app execution
+  local fail=""
+  local venv=""
+
+  (( exit_status != 0 )) && fail="%F{red}✗ %f"
+
+  # Dynamic check for virtualenv 
+  if [[ -n $VIRTUAL_ENV ]]; then
+    venv="%F{242}(${VIRTUAL_ENV:t}) %f"
+  fi
+
+  # Build target
+  PROMPT="${fail}${_SSH_PROMPT_NOTE}${venv}${_CURRENT_DIR_PROMPT}%(!.%F{red}.%F{green})>%f "
+  RPROMPT="%F{242}%D{%d %b %H:%M}%f"
+}
+
+__set_cursor() { echo -ne '\e[6 q'; }
+
+chpwd_functions=( __update_prompt_dir )
+precmd_functions=( __set_cursor __set_zsh_prompt )
+
+# Initialize for the very first shell screen paint
+__update_prompt_dir
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+if [[ -n "$LS_COLORS" ]]; then
+  zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+else
+  zstyle ':completion:*' list-colors ''
+fi
+
+export NVM_DIR="$HOME/.nvm"
+nvm() {
+  unset -f nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+  nvm "$@"
+}
+
+export PYENV_ROOT="$HOME/.pyenv"
+pyenv() {
+  unset -f pyenv
+  if [[ -d "$PYENV_ROOT/bin" ]]; then
+    export PATH="$PYENV_ROOT/bin:$PATH"
+  fi
+  eval "$(command pyenv init --path 2>/dev/null)"
+  eval "$(command pyenv init - 2>/dev/null)"
+  pyenv "$@"
+}
+
+[[ -f ~/.zsh_funcs ]] && source ~/.zsh_funcs
+[[ -f ~/.zsh_aliases ]] && source ~/.zsh_aliases
+
+local plugin_paths=(
+  "/usr/share/zsh/plugins"
+  "/opt/homebrew/share/zsh-autosuggestions"
+  "/usr/local/share/zsh-autosuggestions"
+)
+
+for pdir in $plugin_paths; do
+  if [[ -f "$pdir/zsh-autosuggestions.zsh" ]]; then
+    source "$pdir/zsh-autosuggestions.zsh"
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+    break
+  elif [[ -f "$pdir/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$pdir/zsh-autosuggestions/zsh-autosuggestions.zsh"
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+    break
+  fi
+done
+

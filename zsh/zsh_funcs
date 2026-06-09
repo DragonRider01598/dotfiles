@@ -1,18 +1,3 @@
-# run previous command as root
-pls() {
-  local cmd
-  cmd="$(history -p '!!')"
-
-  [[ "$cmd" == pls* ]] && return 1
-
-  printf 'sudo %s\n' "$cmd"
-  read -r -p "Run this command? [Y/n] " reply
-  case "$reply" in
-    [nN]*) return 1 ;;
-    *) sudo bash -c "$cmd" ;;
-  esac
-}
-
 # make dir and cd into it
 mkcd() {
     mkdir -p "$1" && cd "$1" || return 1
@@ -25,13 +10,6 @@ yay() {
   else
     command yay "$@"
   fi
-}
-
-# fix permission issues with Windows-mounted files
-fixperms() {
-  sudo find . -type f -exec chmod 644 {} \;
-  sudo find . -type d -exec chmod 755 {} \;
-  echo "Permissions fixed (644 for files, 755 for directories)"
 }
 
 # extract files through command line
@@ -86,9 +64,11 @@ autoload_nvmrc() {
 autoload_venv() {
   local venv_path=""
   if [[ -f ".venv/bin/activate" ]]; then
-    venv_path="$(realpath .venv)"
+    venv_path="${(V)PWD}/.venv"
+    venv_path="${venv_path:A}"
   elif [[ -f "venv/bin/activate" ]]; then
-    venv_path="$(realpath venv)"
+    venv_path="${(V)PWD}/venv"
+    venv_path="${venv_path:A}"
   fi
 
   if [[ -n "$venv_path" ]]; then
@@ -97,7 +77,6 @@ autoload_venv() {
       source "$venv_path/bin/activate"
     fi
   else
-    # If no venv found, but one is active, deactivate
     [[ -n "$VIRTUAL_ENV" ]] && deactivate 2>/dev/null
   fi
 }
