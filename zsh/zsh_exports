@@ -1,0 +1,41 @@
+export COLORTERM=truecolor
+export XDG_CONFIG_DIRS="${XDG_CONFIG_DIRS:-/etc/xdg}"
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+export LESS='-R --use-color'
+
+# fd
+if command -v fd >/dev/null 2>&1; then
+  FZF_FD=fd
+elif command -v fdfind >/dev/null 2>&1; then
+  FZF_FD=fdfind
+fi
+
+if [[ -n "$FZF_FD" ]]; then
+  export FZF_DEFAULT_COMMAND="$FZF_FD --type f --hidden --follow --exclude .git"
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+fi
+
+# fzf preview: bat preferred, less fallback
+if command -v bat >/dev/null 2>&1; then
+  FZF_PAGER="bat --color=always --style=numbers,changes,header --line-range=:500"
+elif command -v batcat >/dev/null 2>&1; then
+  FZF_PAGER="batcat --color=always --style=numbers,changes,header --line-range=:500"
+else
+  FZF_PAGER="less -N"
+fi
+
+export FZF_CTRL_T_OPTS="
+  --preview '$FZF_PAGER {}'
+  --preview-window=right:50%
+  --bind 'shift-up:preview-up,shift-down:preview-down'
+"
+
+unset FZF_FD FZF_PAGER
+
+export EDITOR=vim
+export VISUAL=vim
+
+export PATH="$HOME/.local/bin:$PATH"
+
+export NVM_DIR="$HOME/.nvm"
+export PYENV_ROOT="$HOME/.pyenv"

@@ -3,6 +3,12 @@ mkcd() {
     mkdir -p "$1" && cd "$1" || return 1
 }
 
+# fuzzy finds file and then opens in vim
+vf() {
+  local file
+  file=$(fzf) && [[ -n "$file" ]] && vim -- "$file" #requires fzf
+}
+
 # run update only for AUR packages on 'yay'
 yay() {
   if [ "$#" -eq 0 ]; then
@@ -50,6 +56,22 @@ extract() {
 }
 # unrar p7zip-full cabextract xz-utils zstd lzma
 
+nvm() {
+  unset -f nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+  nvm "$@"
+}
+
+pyenv() {
+  unset -f pyenv
+  if [[ -d "$PYENV_ROOT/bin" ]]; then
+    export PATH="$PYENV_ROOT/bin:$PATH"
+  fi
+  eval "$(command pyenv init --path 2>/dev/null)"
+  eval "$(command pyenv init - 2>/dev/null)"
+  pyenv "$@"
+}
+
 autoload_nvmrc() {
   [[ -f .nvmrc ]] || return
   command -v nvm >/dev/null 2>&1 || return
@@ -64,10 +86,10 @@ autoload_nvmrc() {
 autoload_venv() {
   local venv_path=""
   if [[ -f ".venv/bin/activate" ]]; then
-    venv_path="${(V)PWD}/.venv"
+    venv_path="$PWD/.venv"
     venv_path="${venv_path:A}"
   elif [[ -f "venv/bin/activate" ]]; then
-    venv_path="${(V)PWD}/venv"
+    venv_path="$PWD/venv"
     venv_path="${venv_path:A}"
   fi
 
